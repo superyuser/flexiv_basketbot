@@ -145,12 +145,15 @@ loop_time = 0.0
 dt = 0.01
 
 state = State.INIT
+print("Starting in INIT state.")
 
 time.sleep(0.01)
 init_time = time.perf_counter_ns() * 1e-9
 state_start_time = init_time
 
 release_has_triggered = False
+
+set_cartesian_goal(redis_client, ready_pos, ready_ori)
 
 try:
   while True:
@@ -166,23 +169,23 @@ try:
     current_position, current_orientation = read_cartesian_state(redis_client)
 
     if state == State.INIT:
-      set_cartesian_goal(redis_client, ready_pos, ready_ori)
+        pass   
 
-      if reached_pose(current_position, ready_pos, current_orientation, ready_ori, POS_TOL_READY, ORI_TOL_READY):
-        state = State.READY
-        state_start_time = now
-        print("[INIT] Arrived at READY state.")
+    #   if reached_pose(current_position, ready_pos, current_orientation, ready_ori, POS_TOL_READY, ORI_TOL_READY):
+    #     state = State.READY
+    #     state_start_time = now
+    #     print("[INIT] Arrived at READY state.")
 
-      elif state_elapsed > INIT_TIMEOUT:
-        pos_close = get_pos_error(current_position, ready_pos) < 0.035
+    #   elif state_elapsed > INIT_TIMEOUT:
+    #     pos_close = get_pos_error(current_position, ready_pos) < 0.035
 
-        if pos_close:
-          state = State.READY
-          state_start_time = now
-          print("[INIT] Timeout fallback. Moving to READY state.")
-        else:
-          print("[INIT] Timeout reached. Holding READY goal.")
-          state_start_time = now
+    #     if pos_close:
+    #       state = State.READY
+    #       state_start_time = now
+    #       print("[INIT] Timeout fallback. Moving to READY state.")
+    #     else:
+    #       print("[INIT] Timeout reached. Holding READY goal.")
+    #       state_start_time = now
 
     elif state == State.READY:
       set_cartesian_goal(redis_client, ready_pos, ready_ori)
